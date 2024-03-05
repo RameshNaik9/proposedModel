@@ -1,0 +1,15 @@
+# Project exclude paths
+/venv/
+saved_model*
+.idea/
+sloter/vis*/
+*.pyc
+.vscode/
+scripts/
+temp*
+scouterspace/
+.DS_Store
+sloter/.DS_Store
+timm/.DS_Store
+torchcam/.DS_Store
+torchray/.DS_Store
