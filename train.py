@@ -15,7 +15,7 @@ from thop import profile, clever_format
 import tensorly as tl
 import pickle
 
-class_means_path = '/Users/ramesh/IIT KGP/BTP/Proposed Model/scouter_exp/class_means.pkl'
+# class_means_path = '/content/class_means.pkl'
 
 # ignoring deprecated warnings
 import warnings
@@ -71,10 +71,10 @@ def get_args_parser():
                         help='path where to save, empty for no saving')
     parser.add_argument('--pre_dir', default='pre_model/',
                         help='path of pre-train model')
-    parser.add_argument('--device', default='cpu',
-                        help='device to use for training / testing')
-    # parser.add_argument('--device', default='cuda',
+    # parser.add_argument('--device', default='cpu',
     #                     help='device to use for training / testing')
+    parser.add_argument('--device', default='cuda',
+                        help='device to use for training / testing')
     parser.add_argument('--num_workers', default=4, type=int)
     parser.add_argument('--start_epoch', default=0, type=int, metavar='N', help='start epoch')
     parser.add_argument('--resume', default=False, type=str2bool, help='resume from checkpoint')
@@ -93,20 +93,20 @@ def main(args):
     # model = SlotModel(args)
 
     # Load the dictionary from the pickle file
-    with open(class_means_path, 'rb') as file:
-        class_means_dict = pickle.load(file)
+    # with open(class_means_path, 'rb') as file:
+    #     class_means_dict = pickle.load(file)
 
-    # Load class means with map_location to ensure tensors are loaded onto the CPU
-    # with open(class_means_path, 'rb') as f:
-    #     class_means = torch.load(f, map_location=torch.device('cpu'))
+    # # Load class means with map_location to ensure tensors are loaded onto the CPU
+    # # with open(class_means_path, 'rb') as f:
+    # #     class_means = torch.load(f, map_location=torch.device('cpu'))
 
-    # Ensure class_means is a PyTorch tensor, not a numpy array
-    if isinstance(class_means, np.ndarray):
-        class_means = torch.tensor(class_means, dtype=torch.float)
+    # # Ensure class_means is a PyTorch tensor, not a numpy array
+    # # if isinstance(class_means, np.ndarray):
+    # #     class_means = torch.tensor(class_means, dtype=torch.float)
 
-    class_means = torch.stack(list(class_means_dict.values())).float().to(device)
+    # class_means = torch.stack(list(class_means_dict.values())).float().to(device)
 
-    model = SlotModel(args, class_means)
+    model = SlotModel(args)
 
     print("train model: " + f"{'use slot ' if args.use_slot else 'without slot '}" + f"{'negetive loss' if args.use_slot and args.loss_status != 1 else 'positive loss'}")
     model.to(device)

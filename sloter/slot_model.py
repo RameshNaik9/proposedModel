@@ -5,6 +5,7 @@ from sloter.utils.slot_attention import SlotAttention
 from sloter.utils.position_encode import build_position_encoding
 from timm.models import create_model
 from collections import OrderedDict
+import pickle
 
 
 class Identical(nn.Module):
@@ -50,18 +51,30 @@ def load_backbone(args):
 
 
 class SlotModel(nn.Module):
-    def __init__(self, args, class_means):
+    def __init__(self, args):
         super(SlotModel, self).__init__()
         self.use_slot = args.use_slot
         self.backbone = load_backbone(args)
+        class_means_path = '/content/class_means.pkl'
+        # Load the dictionary from the pickle file
+        with open(class_means_path, 'rb') as file:
+            class_means_dict = pickle.load(file)
+
+        class_means = torch.stack(list(class_means_dict.values())).float()
+
         if self.use_slot:
             self.feature_size = 9 if 'densenet' not in args.model else 8
             self.channel = args.channel
             self.conv1x1 = nn.Conv2d(self.channel, args.hidden_dim, kernel_size=1, stride=1)
             if args.pre_trained:
                 self.dfs_freeze(self.backbone, args.freeze_layers)
-            self.slot = SlotAttention(class_means=class_means, vis=args.vis,
-                                      vis_id=args.vis_id, loss_status=args.loss_status, power=args.power)
+            self.slot = SlotAttention(
+                class_means=class_means, 
+                vis=args.vis,
+                vis_id=args.vis_id, 
+                loss_status=args.loss_status, 
+                power=float(args.power)  # Ensuring power is the correct type
+            )
             self.position_emb = build_position_encoding('sine', hidden_dim=args.hidden_dim)
             self.lambda_value = float(args.lambda_value)
         else:
@@ -110,10 +123,10 @@ class SlotModel(nn.Module):
         output = F.log_softmax(x, dim=1)
 
         if target is not None:
-            print("\n\nTarget = ", target)
+            # print("\n\nTarget = ", target)
             # print("\n\nOutput = ", output)
-            print("\nOutput shape = ", output.shape)
-            print("\n------------------------------------------------------------------------------------------------------------------")
+            # print("\nOutput shape = ", output.shape)
+            # print("\n------------------------------------------------------------------------------------------------------------------")
             if self.use_slot:
                 loss = F.nll_loss(output, target) + self.lambda_value * attn_loss
                 return [output, [loss, F.nll_loss(output, target), attn_loss]]
