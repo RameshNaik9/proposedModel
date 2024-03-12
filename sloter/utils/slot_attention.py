@@ -36,27 +36,27 @@ class SlotAttention(nn.Module):
         updates = torch.einsum('bjd,bij->bid', inputs_x, attn)
         updates = updates / inputs_x.size(2)  # Normalize updates
 
-        if self.vis:
-            if self.slots_per_class > 1:
-                new_slots_vis = torch.zeros((slots_vis.size(0), self.num_classes, slots_vis.size(-1)))
-                for slot_class in range(self.num_classes):
-                    new_slots_vis[:, slot_class] = torch.sum(torch.cat([slots_vis[:, self.slots_per_class*slot_class: self.slots_per_class*(slot_class+1)]], dim=1), dim=1, keepdim=False)
-                slots_vis = new_slots_vis.to(updates.device)
+        # if self.vis:
+        #     if self.slots_per_class > 1:
+        #         new_slots_vis = torch.zeros((slots_vis.size(0), self.num_classes, slots_vis.size(-1)))
+        #         for slot_class in range(self.num_classes):
+        #             new_slots_vis[:, slot_class] = torch.sum(torch.cat([slots_vis[:, self.slots_per_class*slot_class: self.slots_per_class*(slot_class+1)]], dim=1), dim=1, keepdim=False)
+        #         slots_vis = new_slots_vis.to(updates.device)
 
-            slots_vis = slots_vis[self.vis_id]
-            slots_vis = ((slots_vis - slots_vis.min()) / (slots_vis.max()-slots_vis.min()) * 255.).reshape(slots_vis.shape[:1]+(int(slots_vis.size(1)**0.5), int(slots_vis.size(1)**0.5)))
-            slots_vis = (slots_vis.cpu().detach().numpy()).astype(np.uint8)
-            for id, image in enumerate(slots_vis):
-                image = Image.fromarray(image, mode='L')
-                image.save(f'sloter/vis/slot_{id:d}.png')
-            # print(self.loss_status*torch.sum(attn.clone(), dim=2, keepdim=False))
-            # print(self.loss_status*torch.sum(updates.clone(), dim=2, keepdim=False))
+        #     slots_vis = slots_vis[self.vis_id]
+        #     slots_vis = ((slots_vis - slots_vis.min()) / (slots_vis.max()-slots_vis.min()) * 255.).reshape(slots_vis.shape[:1]+(int(slots_vis.size(1)**0.5), int(slots_vis.size(1)**0.5)))
+        #     slots_vis = (slots_vis.cpu().detach().numpy()).astype(np.uint8)
+        #     for id, image in enumerate(slots_vis):
+        #         image = Image.fromarray(image, mode='L')
+        #         image.save(f'sloter/vis/slot_{id:d}.png')
+        #     # print(self.loss_status*torch.sum(attn.clone(), dim=2, keepdim=False))
+        #     # print(self.loss_status*torch.sum(updates.clone(), dim=2, keepdim=False))
 
-        if self.slots_per_class > 1:
-            new_updates = torch.zeros((updates.size(0), self.num_classes, updates.size(-1)))
-            for slot_class in range(self.num_classes):
-                new_updates[:, slot_class] = torch.sum(updates[:, self.slots_per_class*slot_class: self.slots_per_class*(slot_class+1)], dim=1, keepdim=False)
-            updates = new_updates.to(updates.device)
+        # if self.slots_per_class > 1:
+        #     new_updates = torch.zeros((updates.size(0), self.num_classes, updates.size(-1)))
+        #     for slot_class in range(self.num_classes):
+        #         new_updates[:, slot_class] = torch.sum(updates[:, self.slots_per_class*slot_class: self.slots_per_class*(slot_class+1)], dim=1, keepdim=False)
+        #     updates = new_updates.to(updates.device)
 
         attn_relu = torch.relu(attn)
         slot_loss = torch.sum(attn_relu) / attn.size(0) / attn.size(1) / attn.size(2)
