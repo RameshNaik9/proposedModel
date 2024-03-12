@@ -15,7 +15,7 @@ from thop import profile, clever_format
 import tensorly as tl
 import pickle
 
-# class_means_path = '/content/class_means.pkl'
+class_means_path = '/content/class_means.pkl'
 
 # ignoring deprecated warnings
 import warnings
@@ -93,8 +93,8 @@ def main(args):
     # model = SlotModel(args)
 
     # Load the dictionary from the pickle file
-    # with open(class_means_path, 'rb') as file:
-    #     class_means_dict = pickle.load(file)
+    with open(class_means_path, 'rb') as file:
+        class_means_dict = pickle.load(file)
 
     # # Load class means with map_location to ensure tensors are loaded onto the CPU
     # # with open(class_means_path, 'rb') as f:
@@ -104,9 +104,11 @@ def main(args):
     # # if isinstance(class_means, np.ndarray):
     # #     class_means = torch.tensor(class_means, dtype=torch.float)
 
-    # class_means = torch.stack(list(class_means_dict.values())).float().to(device)
+    class_means = torch.stack(list(class_means_dict.values())).float().to(device)
 
-    model = SlotModel(args)
+    # Assuming args is already defined and class_means loaded as shown above
+    model = SlotModel(args, class_means=class_means)
+
 
     print("train model: " + f"{'use slot ' if args.use_slot else 'without slot '}" + f"{'negetive loss' if args.use_slot and args.loss_status != 1 else 'positive loss'}")
     model.to(device)
