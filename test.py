@@ -14,10 +14,13 @@ from train import get_args_parser
 from torchvision import datasets, transforms
 from dataset.ConText import ConText, MakeList, MakeListImage
 from dataset.CUB200 import CUB_200
+import pickle
 
 # ignoring deprecated warnings
 import warnings
 warnings.filterwarnings("ignore")
+
+class_means_path = 'class_means.pkl'
 
 def test(args, model, device, img, image, label, vis_id):
     model.to(device)
@@ -125,7 +128,18 @@ def main():
     image = transform(image)
 
     print("label\t", label)
-    model = SlotModel(args)
+    # model = SlotModel(args)
+
+    # Load the dictionary from the pickle file
+    with open(class_means_path, 'rb') as file:
+        class_means_dict = pickle.load(file)
+
+    class_means = torch.stack(list(class_means_dict.values())).float().to(device)
+
+    # Assuming args is already defined and class_means loaded as shown above
+    model = SlotModel(args, class_means=class_means)
+
+
     # Map model to be loaded to specified single gpu.
     checkpoint = torch.load(f"{args.output_dir}/" + model_name, map_location=args.device)
     for k, v in checkpoint.items():
