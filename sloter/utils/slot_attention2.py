@@ -32,13 +32,10 @@ class SlotAttention(nn.Module):
         dots = torch.einsum('bid,bjd->bij', q, k) * self.scale
         attn = F.softmax(dots, dim=-1)  # Normalize the attention scores
 
-        # Aggregate attention over spatial dimensions
-        attn_aggregated = torch.matmul(attn, torch.ones(d, device=attn.device)).squeeze(2)  # Resulting shape: [b, n]
-        
-        # Apply softmax to aggregated attention scores
-        attn_softmax = F.softmax(attn_aggregated, dim=1)
+        # Apply attention to get updates
+        updates = torch.einsum('bjd,bij->bid', inputs_x, attn)
+        updates = updates / inputs_x.size(2)  # Normalize updates
 
-        # Visualize the attention scores
         if self.vis:
         #     if self.slots_per_class > 1:
         #         new_slots_vis = torch.zeros((slots_vis.size(0), self.num_classes, slots_vis.size(-1)))
@@ -61,6 +58,6 @@ class SlotAttention(nn.Module):
         #         new_updates[:, slot_class] = torch.sum(updates[:, self.slots_per_class*slot_class: self.slots_per_class*(slot_class+1)], dim=1, keepdim=False)
         #     updates = new_updates.to(updates.device)
 
-        attn_relu = torch.relu(attn_aggregated)
-        slot_loss = torch.sum(attn_relu) / attn.size(0) / attn.size(1)
-        return self.loss_status * attn_softmax, torch.pow(slot_loss, self.power)
+        attn_relu = torch.relu(attn)
+        slot_loss = torch.sum(attn_relu) / attn.size(0) / attn.size(1) / attn.size(2)
+        return self.loss_status * torch.sum(updates, dim=2), torch.pow(slot_loss, self.power)
