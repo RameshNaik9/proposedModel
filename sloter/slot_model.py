@@ -56,12 +56,6 @@ class SlotModel(nn.Module):
         self.use_slot = args.use_slot
         self.backbone = load_backbone(args)
         dim = class_means.size(1)
-        # class_means_path = '/content/class_means.pkl'
-        # Load the dictionary from the pickle file
-        # with open(class_means_path, 'rb') as file:
-        #     class_means_dict = pickle.load(file)
-
-        # class_means = torch.stack(list(class_means_dict.values())).float()
 
         if self.use_slot:
             self.feature_size = 9 if 'densenet' not in args.model else 8

@@ -90,19 +90,10 @@ def get_args_parser():
 def main(args):
     prt.init_distributed_mode(args)
     device = torch.device(args.device)
-    # model = SlotModel(args)
 
     # Load the dictionary from the pickle file
     with open(class_means_path, 'rb') as file:
         class_means_dict = pickle.load(file)
-
-    # # Load class means with map_location to ensure tensors are loaded onto the CPU
-    # # with open(class_means_path, 'rb') as f:
-    # #     class_means = torch.load(f, map_location=torch.device('cpu'))
-
-    # # Ensure class_means is a PyTorch tensor, not a numpy array
-    # # if isinstance(class_means, np.ndarray):
-    # #     class_means = torch.tensor(class_means, dtype=torch.float)
 
     class_means = torch.stack(list(class_means_dict.values())).float().to(device)
 
