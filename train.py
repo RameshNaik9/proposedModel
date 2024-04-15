@@ -15,7 +15,7 @@ from thop import profile, clever_format
 import tensorly as tl
 import pickle
 
-class_means_path = 'class_means.pkl'
+class_means_path = 'class_means_bt.pkl'
 
 # ignoring deprecated warnings
 import warnings
