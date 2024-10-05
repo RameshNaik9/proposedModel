@@ -95,11 +95,16 @@ def main(args):
     with open(class_means_path, 'rb') as file:
         class_means_dict = pickle.load(file)
 
-    class_means = torch.stack(list(class_means_dict.values())).float().to(device)
+        # class_means = torch.stack(list(class_means_dict.values())).float().to(device)
+        # Convert numpy arrays in class_means_dict to torch tensors
+        class_means = (
+            torch.stack([torch.tensor(v) for v in class_means_dict.values()])
+            .float()
+            .to(device)
+        )
 
     # Assuming args is already defined and class_means loaded as shown above
     model = SlotModel(args, class_means=class_means)
-
 
     print("train model: " + f"{'use slot ' if args.use_slot else 'without slot '}" + f"{'negetive loss' if args.use_slot and args.loss_status != 1 else 'positive loss'}")
     model.to(device)
@@ -134,7 +139,6 @@ def main(args):
         n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
         print(float(n_parameters)/1000000, 'M')
 
-        
         freeze_layers(model)
         model.cpu()
         model.eval()
