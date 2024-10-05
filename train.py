@@ -15,7 +15,7 @@ from thop import profile, clever_format
 import tensorly as tl
 import pickle
 
-class_means_path = 'class_means.pkl'
+class_means_path = 'class_means_skin.pkl'
 
 # ignoring deprecated warnings
 import warnings
@@ -166,9 +166,6 @@ def main(args):
     criterion = torch.nn.CrossEntropyLoss()
     lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=args.lr_drop)
 
-    # abcd = select_dataset(args)
-    # print(abcd)
-    # dataset_train, dataset_val = abcd
     dataset_train, dataset_val = select_dataset(args)
 
     if args.distributed:

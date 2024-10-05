@@ -13,3 +13,5 @@ sloter/.DS_Store
 timm/.DS_Store
 torchcam/.DS_Store
 torchray/.DS_Store
+/skinvenv/
+/data

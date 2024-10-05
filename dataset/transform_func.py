@@ -98,28 +98,60 @@ class Normalize(object):
         return imgs
 
 
+# def make_transform(args, mode):
+#     normalize_value = {"MNIST": [[0.1307], [0.3081]],
+#                        "CUB200": [[0.485, 0.456, 0.406], [0.229, 0.224, 0.225]],
+#                      "ConText": [[0.485, 0.456, 0.406], [0.229, 0.224, 0.225]],
+#                        "ImageNet": [[0.485, 0.456, 0.406], [0.229, 0.224, 0.225]]}
+#     selected_norm = normalize_value[args.dataset]
+#     normalize = Compose([
+#         ToTensor(),
+#         Normalize(selected_norm[0], selected_norm[1])
+#     ])
+
+#     if mode == "train":
+#         return Compose([
+#             Resize((args.img_size, args.img_size)),
+#             Aug(args.aug),
+#             normalize,
+#         ]
+#         )
+#     if mode == "val":
+#         return Compose([
+#             Resize((args.img_size, args.img_size)),
+#             normalize,
+#         ]
+#         )
+#     raise ValueError(f'unknown {mode}')
+
+
 def make_transform(args, mode):
-    normalize_value = {"MNIST": [[0.1307], [0.3081]],
-                       "CUB200": [[0.485, 0.456, 0.406], [0.229, 0.224, 0.225]],
-                     "ConText": [[0.485, 0.456, 0.406], [0.229, 0.224, 0.225]],
-                       "ImageNet": [[0.485, 0.456, 0.406], [0.229, 0.224, 0.225]]}
+    normalize_value = {
+        "MNIST": [[0.1307], [0.3081]],
+        "CUB200": [[0.485, 0.456, 0.406], [0.229, 0.224, 0.225]],
+        "ConText": [[0.485, 0.456, 0.406], [0.229, 0.224, 0.225]],
+        "ImageNet": [[0.485, 0.456, 0.406], [0.229, 0.224, 0.225]],
+        "SkinCancer": [
+            [0.485, 0.456, 0.406],
+            [0.229, 0.224, 0.225],
+        ],  # Add skin cancer normalization
+    }
     selected_norm = normalize_value[args.dataset]
-    normalize = Compose([
-        ToTensor(),
-        Normalize(selected_norm[0], selected_norm[1])
-    ])
+    normalize = Compose([ToTensor(), Normalize(selected_norm[0], selected_norm[1])])
 
     if mode == "train":
-        return Compose([
-            Resize((args.img_size, args.img_size)),
-            Aug(args.aug),
-            normalize,
-        ]
+        return Compose(
+            [
+                Resize((args.img_size, args.img_size)),
+                Aug(args.aug),
+                normalize,
+            ]
         )
     if mode == "val":
-        return Compose([
-            Resize((args.img_size, args.img_size)),
-            normalize,
-        ]
+        return Compose(
+            [
+                Resize((args.img_size, args.img_size)),
+                normalize,
+            ]
         )
-    raise ValueError(f'unknown {mode}')
+    raise ValueError(f"unknown {mode}")
